@@ -17,6 +17,7 @@
 
 package org.apache.seatunnel.engine.server.utils;
 
+import org.apache.seatunnel.shade.com.fasterxml.jackson.core.JsonParser;
 import org.apache.seatunnel.shade.com.fasterxml.jackson.databind.JsonNode;
 import org.apache.seatunnel.shade.com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.seatunnel.shade.com.typesafe.config.Config;
@@ -42,6 +43,10 @@ public class RestUtil {
     private RestUtil() {}
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    static {
+        objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+    }
 
     public static JsonNode convertByteToJsonNode(byte[] byteData) throws IOException {
         return objectMapper.readTree(byteData);
