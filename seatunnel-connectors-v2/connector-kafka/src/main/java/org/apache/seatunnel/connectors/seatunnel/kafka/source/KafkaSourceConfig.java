@@ -82,6 +82,7 @@ import static org.apache.seatunnel.connectors.seatunnel.kafka.config.Config.STAR
 import static org.apache.seatunnel.connectors.seatunnel.kafka.config.Config.START_MODE_OFFSETS;
 import static org.apache.seatunnel.connectors.seatunnel.kafka.config.Config.START_MODE_TIMESTAMP;
 import static org.apache.seatunnel.connectors.seatunnel.kafka.config.Config.TOPIC;
+import static org.apache.seatunnel.connectors.seatunnel.kafka.config.Config.TABLE_PATH;
 
 public class KafkaSourceConfig implements Serializable {
 
@@ -137,13 +138,17 @@ public class KafkaSourceConfig implements Serializable {
         return consumerMetadataList.stream()
                 .collect(
                         Collectors.toMap(
-                                consumerMetadata -> TablePath.of(consumerMetadata.getTopic()),
+                                consumerMetadata -> TablePath.of(consumerMetadata.getTablePath()),
                                 consumerMetadata -> consumerMetadata));
     }
 
     private ConsumerMetadata createConsumerMetadata(ReadonlyConfig readonlyConfig) {
         ConsumerMetadata consumerMetadata = new ConsumerMetadata();
         consumerMetadata.setTopic(readonlyConfig.get(TOPIC));
+        readonlyConfig.getOptional(TABLE_PATH).ifPresent(consumerMetadata::setTablePath);
+        if (StringUtils.isEmpty(consumerMetadata.getTablePath())) {
+            consumerMetadata.setTablePath(consumerMetadata.getTopic());
+        }
         consumerMetadata.setPattern(readonlyConfig.get(PATTERN));
         consumerMetadata.setProperties(new Properties());
         // Create a catalog
@@ -208,7 +213,11 @@ public class KafkaSourceConfig implements Serializable {
     private CatalogTable createCatalogTable(ReadonlyConfig readonlyConfig) {
         Optional<Map<String, Object>> schemaOptions =
                 readonlyConfig.getOptional(TableSchemaOptions.SCHEMA);
-        TablePath tablePath = TablePath.of(readonlyConfig.get(TOPIC));
+        String tablePathConfig = readonlyConfig.get(TABLE_PATH);
+        if (StringUtils.isEmpty(tablePathConfig)) {
+            tablePathConfig = readonlyConfig.get(TOPIC);
+        }
+        TablePath tablePath = TablePath.of(tablePathConfig);
         TableSchema tableSchema;
         if (schemaOptions.isPresent()) {
             tableSchema = new ReadonlyConfigParser().parse(readonlyConfig);

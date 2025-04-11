@@ -48,6 +48,11 @@ public class Config {
                     .withDescription(
                             "Kafka topic name. If there are multiple topics, use , to split, for example: \"tpc1,tpc2\".");
 
+    public static final Option<String> TABLE_PATH =
+            Options.key("table_path")
+                    .stringType()
+                    .noDefaultValue();
+
     public static final Option<Boolean> PATTERN =
             Options.key("pattern")
                     .booleanType()

@@ -35,6 +35,7 @@ import java.util.Properties;
 public class ConsumerMetadata implements Serializable {
 
     private String topic;
+    private String tablePath;
     private boolean isPattern = false;
     private Properties properties;
     private StartMode startMode = StartMode.GROUP_OFFSETS;
